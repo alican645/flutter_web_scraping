@@ -1,4 +1,4 @@
-import 'package:html/dom.dart';
+
 import 'package:web_scraping_flutter/models/filmModel.dart';
 import 'const.dart';
 import 'package:http/http.dart' as http;
@@ -68,7 +68,6 @@ class Helper {
           .getElementsByClassName("ipc-title__text")[0]
           .text
           .toString();
-
     });
 
     //öyle bir fonksiyon yazalım ki sadece
@@ -88,67 +87,45 @@ class Helper {
     //bunun için yeni bir fonksiyon yazalım ve bu fonskiyon bize sadece "ipc-metadata-list ipc-metadata-list--dividers-between sc-71ed9118-0 kxsUNk compact-list-view ipc-metadata-list--base"
     //ismindeki yapıyı döndürsün
   }
-
-  Future<Element> getDocument() async {
+  Future<List<FilmModel>> getFilms() async {
+    List<FilmModel> list = [];
     var response = await http.get(Uri.parse(url));
     var body = response.body;
     var document = parser.parse(body);
     var res = document.getElementsByClassName(
-        "ipc-metadata-list ipc-metadata-list--dividers-between sc-71ed9118-0 kxsUNk compact-list-view ipc-metadata-list--base")[0];
-
-    //.getElementsByClassName(
-    //             "ipc-metadata-list ipc-metadata-list--dividers-between sc-71ed9118-0 kxsUNk compact-list-view ipc-metadata-list--base")
-    //bize List<Element> döndürür ve bunu içindeki [0] elementini kullanacağımız için Elemnt döndüren bir Future fonksiyonu yazdık.
-    return res;
-  }
-
-
-
-
-  Future<List<FilmModel>> getFilmName() async {
-    Element res = await getDocument();
-    List<FilmModel> filmListesi = [];
-    res
-        .getElementsByClassName(
-            "ipc-metadata-list-summary-item sc-1364e729-0 caNpAE cli-parent")
-        .forEach((element) {
-      String filmAdi = element
+        "ipc-metadata-list ipc-metadata-list--dividers-between sc-a1e81754-0 eBRbsI compact-list-view ipc-metadata-list--base")[0];
+    //burada artık filmlere ulaşıldı.
+    //res.children[0]-res.children[249] bütün filmlere ait olan yapılardır
+    //res.children yapsına bir forEach ekleyerek bütün filmlerde dolaşacağız.
+    //var element =res.children[249].text.toString();
+    res.children.forEach((element) {
+      String filmAdi = (element
           .getElementsByClassName("ipc-metadata-list-summary-item__c")[0]
-          .getElementsByClassName("ipc-metadata-list-summary-item__tc")[0]
-          .getElementsByClassName("sc-be6f1408-0 gVGktK cli-children")[0]
           .getElementsByClassName(
-              "ipc-title ipc-title--base ipc-title--title ipc-title-link-no-icon ipc-title--on-textPrimary sc-be6f1408-9 srahg cli-title")[0]
-          .getElementsByClassName("ipc-title__text")[0]
-          .text
-          .toString();
-      String filmSuresi = element
-          .getElementsByClassName("ipc-metadata-list-summary-item__c")[0]
-          .getElementsByClassName("ipc-metadata-list-summary-item__tc")[0]
-          .getElementsByClassName("sc-be6f1408-0 gVGktK cli-children")[0]
-          .getElementsByClassName("sc-be6f1408-7 iUtHEN cli-title-metadata")[0]
-          .getElementsByClassName(
-              "sc-be6f1408-8 fcCUPU cli-title-metadata-item")[1]
-          .text
-          .toString();
-      String yapimYili = element
-          .getElementsByClassName("ipc-metadata-list-summary-item__c")[0]
-          .getElementsByClassName("ipc-metadata-list-summary-item__tc")[0]
-          .getElementsByClassName("sc-be6f1408-0 gVGktK cli-children")[0]
-          .getElementsByClassName("sc-be6f1408-7 iUtHEN cli-title-metadata")[0]
-          .getElementsByClassName(
-              "sc-be6f1408-8 fcCUPU cli-title-metadata-item")[0]
-          .text
-          .toString();
-      String resimYolu = element
+              "ipc-title ipc-title--base ipc-title--title ipc-title-link-no-icon ipc-title--on-textPrimary sc-b0691f29-9 klOwFB cli-title")[0]
+          .text);
+      String resimYolu = (element
           .getElementsByClassName(
               "sc-e5a25b0f-0 jQjDIb cli-poster-container")[0]
-          .getElementsByClassName("ipc-poster ipc-poster--base ipc-poster--dynamic-width ipc-sub-grid-item ipc-sub-grid-item--span-2")[
-              0]
+          .getElementsByClassName("ipc-image")[0]
+          .attributes['src']
+          .toString());
+      String yapimYili = (element
+          .getElementsByClassName("ipc-metadata-list-summary-item__c")[0]
           .getElementsByClassName(
-              "ipc-media ipc-media--poster-27x40 ipc-image-media-ratio--poster-27x40 ipc-media--base ipc-media--poster-m ipc-poster__poster-image ipc-media__img")[0]
-          .getElementsByClassName("ipc-image")[0].attributes["src"].toString();
-      filmListesi.add(FilmModel(filmAdi: filmAdi, resimYolu: resimYolu, yapimYili: yapimYili.toString(), filmSuresi: filmSuresi));
+              "sc-b0691f29-8 ilsLEX cli-title-metadata-item")[0]
+          .text);
+      String filmSuresi = (element
+          .getElementsByClassName("ipc-metadata-list-summary-item__c")[0]
+          .getElementsByClassName(
+              "sc-b0691f29-8 ilsLEX cli-title-metadata-item")[1]
+          .text);
+      list.add(FilmModel(
+          filmAdi: filmAdi,
+          resimYolu: resimYolu,
+          yapimYili: yapimYili,
+          filmSuresi: filmSuresi));
     });
-    return filmListesi;
+    return list;
   }
 }

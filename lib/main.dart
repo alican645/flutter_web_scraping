@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:web_scraping_flutter/const/Helper.dart';
-
 import 'models/filmModel.dart';
 
 
@@ -17,7 +16,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -34,52 +32,43 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  Helper helper=Helper();
-  var data;
-  List<FilmModel> filmListesi=[];
+  Helper helper = Helper();
+  List<FilmModel> filmListesi = [];
 
 
-  void getData() async{
-    var list = helper.getFilmName();
+  void getData() async {
+    var list=helper.getFilms();
     list.then((value) {
       setState(() {
         filmListesi=value;
       });
     });
   }
-  @override
-  void initState(){
+
+  void initState() {
     super.initState();
     getData();
 
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          "IMDB TOP 250"
+        title: Text("IMDB TOP 250"),
+      ),
+      body: filmListesi.length==0?Center(child: CircularProgressIndicator()):ListView.builder(
+        itemCount: filmListesi.length,
+        itemBuilder: (context, index) => Column(
+          children: [
+            Image.network(filmListesi[index].resimYolu.toString(),errorBuilder: (context, error, stackTrace) => Image.asset("assets/indir.png"),),
+            Text(filmListesi[index].filmAdi.toString()),
+            Text(filmListesi[index].filmSuresi.toString()),
+            Text(filmListesi[index].yapimYili.toString()),
+          ],
         ),
       ),
-      body: ListView.builder(
-        itemCount: filmListesi.length,
-        itemBuilder: (context, index) => Container(
-        child: (
-            Column(
-              children: [
-                Image.network(filmListesi[index].resimYolu.toString()),
-                Text(filmListesi[index].filmAdi.toString()),
-                Text(filmListesi[index].filmSuresi.toString()),
-                Text(filmListesi[index].yapimYili.toString()),
-              ],
-            )
-        ),
-      ),)
     );
   }
 }
-
